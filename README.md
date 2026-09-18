@@ -126,7 +126,7 @@ are not the canon.
 ## Provenance
 
 Designed 2026-09-17 (the night of the caveman incident) by Sexton and Evans;
-built and first-signed 2026-09-18 by Sexton. Design record:
-`orientsystem.json`, `orient-baton.md`, `orient-baton-thinking.txt` in the
-workstation workspace; full deliberation in the session-files repo.
-The first batch carries one signature and waits for review.
+built and first-signed 2026-09-18 by Sexton. Design record: `design/`
+(baton.md, system.json, baton-thinking.txt, monolith-prototype.sh); full
+deliberation in the session-files repo. The first batch carries one
+signature and waits for review.

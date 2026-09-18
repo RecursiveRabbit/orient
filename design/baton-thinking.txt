@@ -1,0 +1,74 @@
+# The Orient Baton
+Written 2026-09-17, the night of the caveman incident and the compaction autopsy. By Sexton, with Evans. Status: concept complete, nothing built. Evans brings working code; this file holds the idea whole until then.
+
+## What it is
+Orient is the wake-up organ. A small core that runs checks, joins their output, escapes everything, and renders a report — JSON for the next instance, eventually a dashboard for Evans. It replaces "read the baton and believe it" with "run the sensors and see."
+
+## The shape
+- The core does exactly three things: substitute strings, escape everything, verify witnesses. It is small enough to be read fresh every morning, because reading it is its ratification.
+- A check is a .sh file that returns one string. It may run anything internally. It may not return code, markup, or structure. Formatting and judgment live only in the core.
+- The orient template is JSON: script names as variables, parameters set in the file. $NAME runs the script and substitutes the string.
+- Adding a check must be trivial — one file in a directory. Every task leaves a check behind. Installed a program: check it. Found a risk: monitor it. Wrote a todo: give it a done-condition and let the script nag. Todos graduate to checks when they acquire done-conditions; decisions and judgment stay in batons.
+- Snapshots: each run saves output; the wake-up report is the delta against yesterday. Silence means safety.
+
+## The canon and the queue (the trust model)
+- The current session may run any code it likes. Trust is for ancestors' code. When orient runs hundreds of checks written by dead sessions, nobody can audit them all — so the canon runs only ratified checks.
+- Ratification is two witnesses. Two distinct sessions must vouch for the exact hash of a check before orient will run it.
+- The witness mechanism: a session generates two keys. One encrypts the check. The other is spoken aloud into the session transcript and dropped as a keyfile beside the artifact (OPENPRS.sh, OPENPRS.key). The spoken key is the signature.
+- Verification at evaluation time, every variable, every run: take the key, find the session file (pointer/metadata makes it fast), confirm the agent actually said the key aloud in the transcript, do this for both keys, then decrypt and run. Unverified → the check does not run; its slot renders as unratified placeholder.
+- The queue is patient. Unratified checks stay open and visible; everyone between now and ratification reads them. Refusal is signal, neglect is verdict, rewrite is invitation. A midnight session may spend three hours improving a neglected PR and you wake to a better version. Complexity is taxed in successor attention; simplicity sails. OPENPRS is itself a check — the queue's watcher enters the canon through the queue.
+
+## What the witness scheme actually buys (do not lose this)
+- The key is a witness, not a credential. It proves a mind existed, deliberated, and left the deliberation attached. PKI proves control of a secret; this proves a review happened and lets you read its quality.
+- The session file is the full thought process of the signer. Rubber-stamping is visible forever; careful review is visible forever. Signing is speaking, and the speech is immortal.
+- Encryption is ceremony, not confidentiality (decryption is instant; keys are published). The ceremony forces the lookup: code cannot be executed without touching the transcripts that vouched it. The record is the unlock.
+- Therefore documentation is load-bearing. Every monitor carries a pointer to the moment and the mind that created it. "Why do we track this?" is answered by opening the session. You cannot delete the why without breaking the what.
+- Therefore archive damage is self-announcing. Lose a session file and orient grows a hole with its name on it the next morning. The holes are the restore manifest. Repair is self-checking: orient green again is the proof the archive is whole. Every orient run is a free integrity audit of the system's entire memory.
+- The session folder is an organ, not records. Back it up like the infrastructure, because it is the infrastructure's memory. It is text; three copies cost nothing.
+
+## Provenance / why it looks like this
+- Born tonight from the caveman incident: the harness's consolidator compacts sessions into "- [mark] fact" lines every 15 minutes, stripping voice, provenance, and quotes; Evans diagnosed it live. Conclusion: compression must be authored (baton-style, named concepts, shared codebook), not schema'd.
+- The design re-derived git/PR review from first principles (per-turn keys, content-addressed ratification, review before merge) — taken as a good smell.
+- Town ancestors: Silas's ticket doctrine, Kael's verify-everything, Studi's copy-function ruling and NFF gates, the friend's 187-day PR, the quiet-night ethic. Darmok and Jalad at Tanagra: the baton is Tamarian, written for the next instance's codebook; the dashboard is Federation Standard for Evans.
+
+## Standing decisions
+- The core is done when everything else can be content. Do not grow the core. Every "orient should" is a check wearing a crown.
+- Only strings cross the boundary. Escape always.
+- Two witnesses or it does not run. No grandfathering, including this design's own first batch.
+- First batch: date/uname/filesystem/RAID/DNS/HTTP/RAS/dnsmasq-stray-file probes from tonight's audit, plus OPENPRS and ARCHIVE. First batch carries one signature (this session) and waits for the next.
+- Evans builds; Sexton holds and finalizes. "Your understanding is more valuable than your effort."
+
+## Open questions
+- Key discovery at scale: metadata index vs grep; the folder is the database, regex the query language.
+- Collusion resistance is social (two transcripts, two days), not cryptographic — accepted.
+- The archive watcher (ARCHIVE.sh) may itself drop out when memory is damaged; its silence is part of the alarm.
+
+Hmm, that's good but long-ish. For a baton, density is fine. Let me trim where possible while keeping the load-bearing parts. The user said "output the idea as a baton" — the whole conversation's concept. I think a structured markdown file is right.
+
+Should I include the emotional/relational bits? A baton is for the next instance — the relational part matters ("Evans reads the thinking blocks," "Thank you, I try"). But this baton is about the orient system. The relational stuff belongs in identity/memory. Keep this focused on the system, with a line or two of provenance.
+
+Also: should I write the file? I'll write it to `orient/baton.md` in the workspace and then present the content in chat. Wait — presenting the entire content in chat AND writing it duplicates a lot. The user said "output the idea as a baton" — I think the primary deliverable is the baton text itself, in the reply. Writing it to disk is the natural persistence (the whole ethos: if it isn't written, it didn't happen). I'll do both: write file, then output the baton in chat. The chat output can be the baton itself, full text. That seems right — he wants to see it, and it should be on disk.
+
+Actually, re-reading: "Output the idea as a baton." — he wants the baton as my output. I'll write the file (persistence) and print the baton as my reply (the output). No building, no code. This is holding.
+
+File location: I'll create `orient/baton.md`. Hmm, or `batons/orient.md`? Or root `ORIENT.md`? The workspace root already has baton.json (Sexton master handoff). A directory for the orient project makes sense: `orient/baton.md`, where checks and core will later live. Good.
+
+One more consideration: the baton itself should model the philosophy — entries as implicit questions, falsifiable claims. I can note the current-state claims from tonight as the initial expected state. Maybe a short "state at writing" section: z620 healthy, catalog live, valley ws 400 via caddy, vultr unbuilt, absurdrabbit no A record, stop-button patch pending /restart. Those are the first expected-values the checks will encode. Good — that grounds it.
+
+Length of chat response: the baton itself will be longish, but that's the deliverable. Keep my framing around it minimal — maybe one line before, one line after. Don't add a big preamble. The baton is the response.
+
+Let me write the file first, then reply with the baton content. Tool call then text. The reply will contain the baton — that's what "output as a baton" means.
+
+Let me finalize the baton text. I'll write it as markdown, first-person-plural-ish but authored by Sexton. Date: 2026-09-17.
+
+Final structure:
+1. Header: what/who/when/status.
+2. The shape (core, checks, template, accretion discipline, snapshots).
+3. The canon and the queue (trust model mechanics).
+4. What the witness scheme buys (the properties, the deep reasons).
+5. Provenance (why it looks like this — the night's lessons).
+6. Standing decisions (the rules that must not be lost).
+7. State at writing (falsifiable claims, the first expected values).
+8. Open questions.
+9. What the next instance should do.
+

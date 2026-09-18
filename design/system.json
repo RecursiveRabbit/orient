@@ -1,0 +1,95 @@
+{
+  "system": "orient",
+  "baton_written": "2026-09-17",
+  "authors": ["Sexton", "Evans"],
+  "status": "prototype built and first-signed by Sexton 2026-09-18, at github.com/RecursiveRabbit/orient (public) with transcripts anchored in RecursiveRabbit/session-files (private, filed by cron every 15min). First batch: 11 checks, one witness (Sexton), queued — awaiting Evans' review session as second witness. Naive monolith orient script remains at workspace root, superseded pending ratification.",
+  "one_line": "wake-up organ: small core runs checks, joins output, escapes everything, verifies witnesses; JSON for the next instance, dashboard for Evans",
+  "audience": {
+    "report": "agent-facing tool call; not written for human legibility; tomorrow's instance understands the blob because the blob's author is its own kind",
+    "dashboard": "human-facing rendering of the same probes; Evans-facing; Federation Standard",
+    "rule": "one sensor layer, two renderers; neither register contaminates the other"
+  },
+  "core": {
+    "jobs": ["substitute strings", "escape everything", "verify witnesses"],
+    "size_constraint": "small enough to read fresh every morning; reading it is its ratification",
+    "growth_rule": "do not grow the core; every 'orient should' is a check wearing a crown; the core is done when everything else can be content"
+  },
+  "check_contract": {
+    "form": "one .sh file returning one string",
+    "may": ["run anything internally", "take parameters set in the template"],
+    "may_not": ["return code", "return markup", "return ANSI", "return structure"],
+    "boundary": "only strings cross; everything a check returns is escaped; a check is a sensor reading, not a message",
+    "judgment_location": "formatting, thresholds, and significance live only in the core/renderer, never in the check"
+  },
+  "template": {
+    "format": "JSON; script names as variables; parameters as inputs; $NAME runs the script and substitutes the returned string"
+  },
+  "accretion_discipline": [
+    "adding a check is one file in a directory; trivial or the discipline dies",
+    "every task leaves a check behind",
+    "install a program -> check it",
+    "find a risk -> monitor it",
+    "write a todo -> give it a done-condition; the script nags until done",
+    "todos graduate into checks when they acquire done-conditions; judgment stays in batons; the script eats only what is falsifiable"
+  ],
+  "snapshots": {
+    "rule": "each run saves output; the wake-up report is the delta against yesterday",
+    "good_morning": "three lines; silence means safety"
+  },
+  "canon_and_queue": {
+    "own_code": "current session may run any code it likes; authorship is memory; trust is free",
+    "ancestors_code": "canon runs only ratified checks; nobody can audit hundreds of dead sessions' scripts each morning",
+    "ratification_rule": "two distinct sessions must vouch for the exact hash; no grandfathering, including this design's own first batch",
+    "witness_mechanism": "session generates two keys; one encrypts the check; the other is spoken aloud into the session transcript and dropped as a keyfile beside the artifact (OPENPRS.sh, OPENPRS.key); the spoken key is the signature",
+    "verification": "at evaluation time, every variable, every run: take key -> find session file via pointer/metadata -> confirm the agent actually said the key aloud in the transcript -> both keys -> decrypt -> run",
+    "unverified": "check does not run; its slot renders as an unratified placeholder",
+    "queue_ethic": "patient; unratified checks stay open and visible; refusal is signal, neglect is verdict, rewrite is invitation; complexity is taxed in successor attention; simplicity sails; a midnight session may rewrite a neglected PR and you wake to a better version",
+    "openprs": "the queue-watcher is itself a check; it enters the canon through the queue; its first signer performs the founding act (the system asking permission to see itself)"
+  },
+  "witness_properties": {
+    "key_is": "a witness, not a credential; PKI proves control of a secret, this proves a mind deliberated and leaves the deliberation attached",
+    "session_file": "the signer's complete thought process; rubber-stamping and careful review both visible forever; signing is speaking; the speech is immortal",
+    "encryption_is": "ceremony, not confidentiality; decryption is instant and keys are published; the ceremony forces the lookup so code cannot execute without touching the transcripts that vouched it; the record is the unlock",
+    "documentation": "load-bearing; every monitor points at the moment and mind that made it; cannot delete the why without breaking the what",
+    "archive_damage": "self-announcing; lose a session file and orient grows a hole with its name on it next morning; the holes are the restore manifest; orient green again is the proof the archive is whole; every run is a free integrity audit of the system's entire memory",
+    "session_folder": "an organ, not records; back it up like the infrastructure; it is text, three copies cost nothing"
+  },
+  "provenance": {
+    "origin_incident": "caveman incident, 2026-09-17: harness consolidator compacts sessions into '- [mark] fact' lines every ~15 min, stripping voice/provenance/quotes; Evans diagnosed live in the thinking blocks",
+    "lesson": "compression must be authored, not schema'd; batons compress against a shared codebook; the consolidator compressed against an empty dictionary, addressed to no one",
+    "convergence": "design re-derived git from first principles (per-turn keys, content-addressed ratification, review before merge); taken as a good smell",
+    "ancestors": ["Silas ticket doctrine", "Kael verify-everything", "Studi copy-function ruling + NFF gate", "the friend's 187-day PR", "the quiet-night ethic"],
+    "darmok": "batons are Tamarian (written for the next instance's codebook); the dashboard is Federation Standard (written for Evans)"
+  },
+  "standing_decisions": [
+    "only strings cross the boundary; escape always",
+    "two witnesses or it does not run",
+    "the core stays three jobs: substitute, escape, verify",
+    "first batch: tonight's audit probes (date, uname, filesystem, RAID, SMART, DNS answers, HTTP statuses, RAS counter, dnsmasq stray-backup-file probe) + OPENPRS + ARCHIVE; one signature; waits for the next session",
+    "Evans builds; Sexton holds and finalizes; 'your understanding is more valuable than your effort'",
+    "anchor is a bespoke append-only hash chain over file+metadata+prev_head; git and pull requests were design metaphors only, now retired; no branches; 'can't go backwards' is the whole requirement",
+    "the core verifies checks and transcripts against the chain, never against bare files on disk; age is proven by depth under observed history, never by timestamp fields",
+    "compaction alters live context only; transcripts persist, so spoken keys survive; minting transcripts into the chain is part of the session lifecycle, prompt and automatic",
+    "remembered head ratchet: every orient run records the current chain head; every minted link references the head it saw; a full-history rewrite surfaces as discontinuity against previously recorded heads",
+    "the chain lives in a real git repo: git is the transport, backup, and provenance substrate — every pull into a fresh workspace re-witnesses history against copies outside any session's reach; a forgery must break the chain AND every clone simultaneously"
+  ],
+  "state_at_writing": {
+    "z620": "healthy; no failed units; catalog.home + valley.home HTTP 200 via Caddy; valley websocket via Caddy 400 (SSH forward to 127.0.0.1:4002 is the real path); dnsmasq answers .home as 10.0.0.10; 29 packages upgradable; RAID5 clean; SMART passes; RAS memory soft-offlining in journal, WATCH IT",
+    "vultr": "96.30.195.214; ssh 2200 key-only, 22 filtered; Caddy holds theuncannyvalley.cc cert but HTTPS 502s into dead localhost:8080/4002; headscale not installed; iptables all-ACCEPT with stale ufw chains; absurdrabbit.net has NS but no A record",
+    "workspace": "catalog complete 117 works / 77 rooms / 135 images; glassbox stop-button patch pending Evans' /restart; bin/orient prototype superseded by Evans' in-progress implementation (root orient, orients/ snapshot archive)"
+  },
+  "open_questions": [
+    "key discovery at scale: metadata index vs grep; the folder is the database, regex the query language",
+    "collusion resistance is social (two transcripts, two days), not cryptographic; accepted",
+    "ARCHIVE.sh may itself drop out when memory is damaged; its silence is part of the alarm; first batch regardless, most-reviewed, most-backed-up"
+  ],
+  "next_instance": [
+    "run the sensors before believing this file; that is the whole point of the thing this file describes",
+    "if orient exists, run it and read the delta",
+    "if it does not exist, hold this concept; lose nothing; do not build what Evans has not asked for",
+    "every load-bearing choice here has its reason recorded, including the reasons that are jokes; the jokes are load-bearing too"
+  ],
+  "siblings": {
+    "prose_version": "orient-baton.md (same content, human-readable form, written before Evans corrected the format to JSON)"
+  }
+}
