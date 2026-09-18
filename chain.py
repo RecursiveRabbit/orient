@@ -61,6 +61,13 @@ def verify():
     ls = links()
     if not ls:
         return "chain empty"
+    # A path may be re-minted (a check is corrected and re-signed); the chain
+    # is append-only history, so the on-disk content check applies to the
+    # LATEST link per path. Older links are verified structurally forever.
+    latest = {}
+    for link in ls:
+        if link["path"]:
+            latest[link["path"]] = link["seq"]
     prev = None
     for link in ls:
         recorded = link.pop("hash", None)
@@ -68,7 +75,7 @@ def verify():
             return f"CHAIN BREAK at seq {link['seq']}: hash mismatch"
         if link["prev"] != prev:
             return f"CHAIN BREAK at seq {link['seq']}: prev linkage broken"
-        if link["path"]:
+        if link["path"] and latest.get(link["path"]) == link["seq"]:
             p = ROOT / link["path"]
             if not p.exists():
                 return f"CHAIN HOLE at seq {link['seq']}: {link['path']} missing from disk"
