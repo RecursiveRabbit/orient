@@ -111,6 +111,10 @@ openssl enc -d -aes-256-cbc -a -pbkdf2 -pass pass:<key> -in checks/NAME.sh.enc
 chain head. Sessions repo location: `$ORIENT_SESSIONS_REPO` or
 `~/Coding_Projects/session-files`.
 
+**Test:** `./orient.py test` — one witness is enough to run a check. For
+testing new checks and formatting; test reports are marked `mode: test` and
+are not the canon.
+
 ## Trust stack
 
 1. `orient.py` — read fresh every morning; small enough that reading is ratification.

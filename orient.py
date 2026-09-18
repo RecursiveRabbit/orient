@@ -21,6 +21,9 @@ witness count. The chain (chain/chain.jsonl) is append-only; every report
 records the head it saw (the ratchet: a rewritten history discontinues
 against heads already recorded).
 
+Flag: `orient.py test` — one witness is enough to run. For testing new checks
+and formatting; a test report is marked mode=test and is not the canon.
+
 Sessions repo: $ORIENT_SESSIONS_REPO or ~/Coding_Projects/session-files.
 """
 import hashlib
@@ -39,6 +42,7 @@ CHECKS = ROOT / "checks"
 SESSIONS = Path(os.environ.get("ORIENT_SESSIONS_REPO",
                                Path.home() / "Coding_Projects" / "session-files"))
 TIMEOUT = 30
+TEST = False  # one witness suffices when set (see main)
 
 
 def sha(b):
@@ -103,7 +107,8 @@ def evaluate(name, args):
         if k:
             keys.append(k)
             seen.add(witness["session_path"])
-    if len(keys) < 2:
+    needed = 1 if TEST else 2
+    if len(keys) < needed:
         return (f"UNRATIFIED {len(keys)}/2 witnesses — "
                 f"see checks/{name}.witness.json")
     plain = peel(enc.read_bytes(), list(reversed(keys)))
@@ -146,12 +151,16 @@ def render(node, out):
 
 
 def main():
+    global TEST
+    TEST = any(a.lstrip("-") == "test" for a in sys.argv[1:])
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     report = {
         "generated_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "chain_head": chain_head(),
         "report": render(json.loads(TEMPLATE.read_text()), {}),
     }
+    if TEST:
+        report["mode"] = "test"
     out = json.dumps(report, indent=1)
     (ROOT / "reports").mkdir(exist_ok=True)
     (ROOT / "reports" / f"orient-{stamp}.json").write_text(out + "\n")
