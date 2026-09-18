@@ -1,0 +1,21 @@
+{
+  "workstation": {
+    "time_utc": "$DATE",
+    "uname": "$UNAME",
+    "dns": "$DNS",
+    "http": "$HTTP"
+  },
+  "z620": {
+    "time_utc": "$DATE host=z620",
+    "uname": "$UNAME host=z620",
+    "filesystem": "$FILESYSTEM",
+    "raid": "$RAID",
+    "smart": "$SMART",
+    "ras_memory_errors_this_boot": "$RAS",
+    "dnsmasq": "$DNSMASQ"
+  },
+  "organ": {
+    "queue": "$OPENPRS",
+    "archive": "$ARCHIVE"
+  }
+}

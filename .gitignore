@@ -1,0 +1,5 @@
+# Plaintext checks never enter the public repo. What ships is the encrypted
+# artifact, the witness record, and the pointer. Decrypt via the transcripts.
+checks/src/
+reports/
+__pycache__/
