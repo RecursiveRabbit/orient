@@ -26,9 +26,11 @@ with "run the sensors and see."
   warm vs 1.1 s cold. The report carries the socket path, so the reading
   agent starts its session already connected to the fleet, or knowing it
   can't be.
-- **Accretion discipline:** adding a check is one file in `checks/src/` plus
-  one signature. Every task leaves a check behind. Install a program: check
-  it. Find a risk: monitor it. Write a todo: give it a done-condition.
+- **Accretion discipline:** adding a check is one transient source file plus
+  one signature. The source is never stored — only the encrypted artifact,
+  the witness record, and the pointer persist. Every task leaves a check
+  behind. Install a program: check it. Find a risk: monitor it. Write a
+  todo: give it a done-condition.
 - **Snapshots:** every run saves `reports/`. The wake-up report will become a
   delta against yesterday; silence means safety. (Delta engine: future work.)
 
@@ -90,11 +92,15 @@ file on disk. Its silence is part of the alarm.
 **Author a check:**
 
 ```sh
-# write checks/src/NAME.sh — one file, one string
+# write the source somewhere transient — /tmp/NAME.sh, a heredoc, anywhere.
+# The source is never stored in the repo.
 python3 sign.py NAME                       # prints a fresh key
 # speak the key aloud in your session, commit your session file, note the commit
 python3 sign.py NAME --signer YOU --key orient-key-NAME-… \
-    --session-path nanobot/…/session.jsonl --commit <sha>
+    --session-path nanobot/…/session.jsonl --commit <sha> --src /tmp/NAME.sh
+# the plaintext is then gone; what persists is the encrypted artifact, the
+# witness record, and the pointer. To read the code later, decrypt with the
+# spoken key from the transcript — the record is the only source.
 ```
 
 **Review a queued check:**

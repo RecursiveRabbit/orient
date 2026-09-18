@@ -2,22 +2,24 @@
 """
 sign — the witness act. Not part of the core; any session may write its own.
 
-  sign.py NAME --signer WHO --session-path P --commit C [--key K]
+  sign.py NAME --signer WHO --session-path P --commit C [--key K] [--src FILE]
 
-Encrypts checks/src/NAME.sh with the witness key (layered outermost over any
+Encrypts the check source with the witness key (layered outermost over any
 prior signatures), writes checks/NAME.sh.enc, updates checks/NAME.witness.json,
 writes checks/NAME.key (a pointer to the session transcript at a specific
 commit), and mints all three artifacts into the chain.
 
-The key is not stored in this repo. Speak it aloud in your session, commit
-your session file to the session-files repo, and pass that commit here.
-The keyfile is only a pointer; the record is the unlock.
+THE SOURCE IS NOT STORED. --src points at a transient file (a temp file, a
+heredoc, /dev/stdin) that exists for the duration of the signing and is then
+gone. To read a check's code later, decrypt the artifact with the spoken key
+from the transcript — the record is the only source. A check without its
+session file is static; it cannot run and it cannot be read.
 
 Flow for a signer:
   1. sign.py NAME --signer WHO            # prints a fresh key
   2. speak the key aloud in your session
   3. commit your session file; note the commit hash
-  4. sign.py NAME --signer WHO --key K --session-path P --commit C
+  4. sign.py NAME --signer WHO --key K --session-path P --commit C --src FILE
 """
 import hashlib
 import json
@@ -97,7 +99,10 @@ def main():
         blob = crypt(blob, opt["key"])  # our layer goes outermost
         w["witnesses"].append(witness)
     else:
-        src = (CHECKS / "src" / f"{name}.sh").read_bytes()
+        if "src" not in opt:
+            raise SystemExit("first signature needs --src FILE (a transient "
+                             "file; the source is not stored)")
+        src = Path(opt["src"]).read_bytes()
         w = {"check": name, "sha256": hashlib.sha256(src).hexdigest(),
              "witnesses": [witness]}
         blob = crypt(src, opt["key"])
