@@ -17,15 +17,7 @@ with "run the sensors and see."
   ANSI, or structure. Only strings cross the boundary; everything a check
   returns is escaped.
 - **The template is JSON.** `"$NAME key=value"` runs check `NAME` with those
-  arguments and substitutes the returned string. A check may take an earlier
-  check's output as input: `"$RAS conn=$CONNECT_Z620"` substitutes the earlier
-  slot's string (word-split into argv). Slots may name outputs with
-  `alias=NAME` for later reference.
-- **Connections come first.** The template's first slots open shared SSH
-  connections (`CONNECT`), and every remote check rides the socket — 11 ms
-  warm vs 1.1 s cold. The report carries the socket path, so the reading
-  agent starts its session already connected to the fleet, or knowing it
-  can't be.
+  arguments and substitutes the returned string.
 - **Accretion discipline:** adding a check is one file in `checks/src/` plus
   one signature. Every task leaves a check behind. Install a program: check
   it. Find a risk: monitor it. Write a todo: give it a done-condition.

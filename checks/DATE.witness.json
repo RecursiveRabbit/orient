@@ -1,0 +1,13 @@
+{
+ "check": "DATE",
+ "sha256": "694b923bf261b76916f9907adfa6963d690187dc92d3f2cb9c393ed0b7f3b6c0",
+ "witnesses": [
+  {
+   "signer": "Sexton",
+   "spoken_utc": "2026-09-18T09:21:46Z",
+   "session_repo": "RecursiveRabbit/session-files",
+   "session_path": "nanobot/6c4034594c9841f32740de80fc7fd90a/d2Vic29ja2V0Ojc4NDNlMDg2LTQzNTEtNDFmMC1hYTI2LTcwMmViNGU1ZDFjNQ.jsonl",
+   "commit": "3deb59b0b83f02b3d3ab4433a444d4dc7b481625"
+  }
+ ]
+}

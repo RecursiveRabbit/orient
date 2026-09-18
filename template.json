@@ -1,8 +1,4 @@
 {
-  "connections": {
-    "z620": "$CONNECT host=z620 alias=CONNECT_Z620",
-    "vultr": "$CONNECT host=vultr alias=CONNECT_VULTR"
-  },
   "workstation": {
     "time_utc": "$DATE",
     "uname": "$UNAME",
@@ -10,13 +6,13 @@
     "http": "$HTTP"
   },
   "z620": {
-    "time_utc": "$DATE host=z620 conn=$CONNECT_Z620",
-    "uname": "$UNAME host=z620 conn=$CONNECT_Z620",
-    "filesystem": "$FILESYSTEM conn=$CONNECT_Z620",
-    "raid": "$RAID conn=$CONNECT_Z620",
-    "smart": "$SMART conn=$CONNECT_Z620",
-    "ras_memory_errors_this_boot": "$RAS conn=$CONNECT_Z620",
-    "dnsmasq": "$DNSMASQ conn=$CONNECT_Z620"
+    "time_utc": "$DATE host=z620",
+    "uname": "$UNAME host=z620",
+    "filesystem": "$FILESYSTEM",
+    "raid": "$RAID",
+    "smart": "$SMART",
+    "ras_memory_errors_this_boot": "$RAS",
+    "dnsmasq": "$DNSMASQ"
   },
   "organ": {
     "queue": "$OPENPRS",
