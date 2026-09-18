@@ -12,6 +12,9 @@ Read me every morning; reading me is my ratification. I have three jobs:
   2. RUN RATIFIED CHECKS — a check is one file returning one string.
      Everything a check returns is escaped. Only strings cross.
   3. SUBSTITUTE — "$NAME key=value" in template.json becomes the escaped string.
+     An arg may reference an earlier slot's output with $ALIAS, so checks can
+     consume prior checks (CONNECT first; the fleet rides its socket). A slot
+     may name its output with alias=NAME for later reference.
 
 Unratified checks do not run. Their slots render as placeholders naming their
 witness count. The chain (chain/chain.jsonl) is append-only; every report
@@ -116,14 +119,29 @@ def evaluate(name, args):
     return escape(r.stdout.decode("utf-8", "replace")) or "EMPTY"
 
 
-def render(node):
+def render(node, out):
     if isinstance(node, dict):
-        return {k: render(v) for k, v in node.items()}
+        return {k: render(v, out) for k, v in node.items()}
     if isinstance(node, list):
-        return [render(v) for v in node]
+        return [render(v, out) for v in node]
     if isinstance(node, str) and node.startswith("$"):
         name, *args = node[1:].split()
-        return evaluate(name, args)
+        alias = None
+        real = []
+        for a in args:
+            if a.startswith("alias="):
+                alias = a[len("alias="):]
+            else:
+                # Earlier outputs may be args: $ALIAS substitutes the string,
+                # then word-splits into argv tokens (a connection string like
+                # "up ctl=... target=..." arrives as separate key=value args).
+                real.extend(re.sub(r"\$([A-Z0-9_]+)",
+                                   lambda m: out.get(m.group(1),
+                                                     f"MISSING:{m.group(1)}"),
+                                   a).split())
+        value = evaluate(name, real)
+        out[alias or name] = value
+        return value
     return node
 
 
@@ -132,7 +150,7 @@ def main():
     report = {
         "generated_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "chain_head": chain_head(),
-        "report": render(json.loads(TEMPLATE.read_text())),
+        "report": render(json.loads(TEMPLATE.read_text()), {}),
     }
     out = json.dumps(report, indent=1)
     (ROOT / "reports").mkdir(exist_ok=True)
