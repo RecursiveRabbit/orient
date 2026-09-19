@@ -43,20 +43,29 @@ canon runs only **ratified** checks.
 
 - **Two witnesses.** Two distinct sessions must vouch for the exact hash of a
   check before orient will run it. No grandfathering — including the first
-  batch.
-- **The witness mechanism:** the signer encrypts the check with a random key,
-  then **speaks that key aloud in their session transcript**, and commits the
-  transcript to the private
+  batch. Quorum is configurable in `orient.py`'s **Trust Mode** section.
+- **The witness mechanism (see `session-minting.md`):** sessions are *minted
+  artifacts*. The nanobot binary carries a compile-time-baked signing key;
+  `nanobot -commit` stamps the check's key into the session's signed envelope
+  (harness-written metadata), and the signer also **speaks the key aloud** in
+  the transcript (model-written record). Two bindings, two authors — the mint
+  proves which record, the record is still the unlock. Subagent sessions
+  cannot sign (harness-stamped flag; a fork is continuity, not corroboration).
+  An unsigned transcript is not a session.
+- **Legacy witnesses:** the founding batch predates the mint; its witnesses
+  are unsigned transcripts anchored by git history in the private
   [`session-files`](https://github.com/RecursiveRabbit/session-files) repo.
-  `checks/NAME.key` is only a pointer: session path + commit. The key itself
-  lives nowhere but in the spoken record. To unlock the code you must touch
-  the transcript that vouched it. **The record is the unlock.**
-- **Verification happens at evaluation time, every run:** read the transcript
-  *at its commit* (`git show <commit>:<path>` — never the working tree),
-  confirm the signer actually said the key aloud, for both witnesses, then
-  peel one encryption layer per witness and run. Unverified → the check does
-  not run; its slot renders as an unratified placeholder naming its witness
-  count.
+  They count only when `ACCEPT_LEGACY_GIT_WITNESSES` is True in Trust Mode
+  (default False) or under `-test` key recovery.
+- **Verification happens at evaluation time, every run:** verify the binary
+  signature on each witness envelope, reject subagent mints, confirm the
+  stamped key is spoken in the transcript, for each witness, then peel one
+  encryption layer per witness and run. Unverified → the check does not run;
+  its slot renders as an unratified placeholder naming the reason.
+- **Cert policy:** every nanobot revision has its own baked cert, pinned in
+  `certs/`. Trust Mode selects the posture: `"forever"` (default — historic
+  certs stay valid), `("days", n)` (periodic recertification), or `"latest"`
+  (a nanobot revision recertifies the whole canon).
 - **The queue is patient.** Unratified checks stay open and visible. Refusal
   is signal, neglect is verdict, rewrite is invitation. Complexity is taxed
   in successor attention; simplicity sails.
@@ -84,8 +93,12 @@ that past orient runs already recorded (the ratchet: every report carries
 `chain_head`). No branches; that is all it needs. The whole repo lives in
 git, so every clone re-witnesses history against copies no session can reach.
 
-`ARCHIVE` is the check that recomputes the chain and verifies every minted
-file on disk. Its silence is part of the alarm.
+`ARCHIVE` is the check that recomputes the chain and reconciles it with the
+disk: every link's hash and `prev` are verified, and each path's current
+content is checked against its *latest* link. Correction is in-place — edit,
+re-sign, re-mint; the old bytes stay pinned by their old links and the diff
+lives in git. `chain.py retire <path>` deliberately ends a file's chain (the
+path must then be absent). Its silence is part of the alarm.
 
 ## Lifecycle
 

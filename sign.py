@@ -2,24 +2,23 @@
 """
 sign — the witness act. Not part of the core; any session may write its own.
 
-  sign.py NAME --signer WHO --session-path P --commit C [--key K] [--src FILE]
+  sign.py NAME --signer WHO --session-path P --commit C --key K [--src FILE]
+  sign.py NAME --signer WHO --minted-session M --key K [--src FILE]
 
-Encrypts the check source with the witness key (layered outermost over any
-prior signatures), writes checks/NAME.sh.enc, updates checks/NAME.witness.json,
-writes checks/NAME.key (a pointer to the session transcript at a specific
-commit), and mints all three artifacts into the chain.
+Encrypts the check source (checks/src/NAME.sh, or --src) with the witness
+key (layered outermost over any prior signatures), writes checks/NAME.sh.enc,
+updates checks/NAME.witness.json, writes checks/NAME.key (a pointer to the
+witness session), and mints all three artifacts into the chain.
 
-THE SOURCE IS NOT STORED. --src points at a transient file (a temp file, a
-heredoc, /dev/stdin) that exists for the duration of the signing and is then
-gone. To read a check's code later, decrypt the artifact with the spoken key
-from the transcript — the record is the only source. A check without its
-session file is static; it cannot run and it cannot be read.
+Two witness forms (session-minting.md):
+  --minted-session M — a nanobot-minted session envelope in sessions/ (the
+    preferred form; M is the .mint.json filename; the harness stamps the key
+    into the signed envelope and the model speaks it in the transcript).
+  --session-path P --commit C — legacy: an unsigned transcript anchored by
+    git history in the session-files repo. Only counts when orient.py's
+    ACCEPT_LEGACY_GIT_WITNESSES is True (or under `-test` recovery).
 
-Flow for a signer:
-  1. sign.py NAME --signer WHO            # prints a fresh key
-  2. speak the key aloud in your session
-  3. commit your session file; note the commit hash
-  4. sign.py NAME --signer WHO --key K --session-path P --commit C --src FILE
+With no --key, prints a fresh key to speak aloud and exits.
 """
 import hashlib
 import json
@@ -33,26 +32,32 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 CHECKS = ROOT / "checks"
-SESSIONS = Path(os.environ.get("ORIENT_SESSIONS_REPO",
-                               Path.home() / "Coding_Projects" / "session-files"))
+LEGACY_REPO = Path(os.environ.get(
+    "ORIENT_SESSIONS_REPO", Path.home() / "Coding_Projects" / "session-files"))
 sys.path.insert(0, str(ROOT))
 from chain import append  # noqa: E402
 
-KEY_RE = "orient-key-{name}-[0-9a-f]{{24}}"
 
-
-def spoken_key(name, witness):
-    r = subprocess.run(["git", "-C", str(SESSIONS), "show",
+def legacy_spoken_key(name, witness):
+    r = subprocess.run(["git", "-C", str(LEGACY_REPO), "show",
                         f"{witness['commit']}:{witness['session_path']}"],
                        capture_output=True)
     if r.returncode != 0:
         raise SystemExit(f"cannot read transcript at {witness['commit'][:12]}")
-    m = re.search(KEY_RE.format(name=re.escape(name)),
+    m = re.search(rf"orient-key-{re.escape(name)}-[0-9a-f]{{24}}",
                   r.stdout.decode("utf-8", "replace"))
     if not m:
         raise SystemExit(f"spoken key for {name} not found in "
                          f"{witness['session_path']}@{witness['commit'][:12]}")
     return m.group(0)
+
+
+def minted_key(name, mint_path):
+    env = json.loads((ROOT / "sessions" / mint_path).read_text())
+    key = (env.get("keys") or {}).get(name)
+    if not key:
+        raise SystemExit(f"mint {mint_path} stamps no key for {name}")
+    return key
 
 
 def crypt(data, key, decrypt=False):
@@ -82,27 +87,34 @@ def main():
         print(f"orient-key-{name}-{secrets.token_hex(12)}")
         return
 
-    witness = {"signer": signer,
-               "spoken_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-               "session_repo": "RecursiveRabbit/session-files",
-               "session_path": opt["session-path"],
-               "commit": opt["commit"]}
+    if "minted-session" in opt:
+        witness = {"signer": signer,
+                   "spoken_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                   "minted_session": opt["minted-session"]}
+    else:
+        witness = {"signer": signer,
+                   "spoken_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                   "session_repo": "RecursiveRabbit/session-files",
+                   "session_path": opt["session-path"],
+                   "commit": opt["commit"]}
 
     if enc_f.exists():
         w = json.loads(wit_f.read_text())
         blob = enc_f.read_bytes()
         for prior in reversed(w["witnesses"]):  # peel outermost first
-            blob = crypt(blob, spoken_key(name, prior), decrypt=True)
+            if "minted_session" in prior:
+                k = minted_key(name, prior["minted_session"])
+            else:
+                k = legacy_spoken_key(name, prior)
+            blob = crypt(blob, k, decrypt=True)
         if hashlib.sha256(blob).hexdigest() != w["sha256"]:
             raise SystemExit(f"{name}: plaintext does not match ratified "
                              "sha256 — refuse to countersign")
         blob = crypt(blob, opt["key"])  # our layer goes outermost
         w["witnesses"].append(witness)
     else:
-        if "src" not in opt:
-            raise SystemExit("first signature needs --src FILE (a transient "
-                             "file; the source is not stored)")
-        src = Path(opt["src"]).read_bytes()
+        src_f = Path(opt.get("src", CHECKS / "src" / f"{name}.sh"))
+        src = src_f.read_bytes()
         w = {"check": name, "sha256": hashlib.sha256(src).hexdigest(),
              "witnesses": [witness]}
         blob = crypt(src, opt["key"])
@@ -113,12 +125,12 @@ def main():
     key_f.write_text(json.dumps({
         "check": name,
         "key_id": opt["key"],
-        "note": ("The key is not here. It was spoken aloud in the session "
-                 "transcript at this commit. Read the transcript; the "
-                 "record is the unlock."),
-        "session_repo": witness["session_repo"],
-        "session_path": witness["session_path"],
-        "commit": witness["commit"]}, indent=1) + "\n")
+        "note": ("The key is not here. It was spoken aloud in the witness "
+                 "session and stamped into its mint envelope. Read the "
+                 "record; the record is the unlock."),
+        **{k: witness[k] for k in
+           ("minted_session", "session_repo", "session_path", "commit")
+           if k in witness}}, indent=1) + "\n")
     for f in (enc_f, wit_f, key_f):
         h = append("check", str(f.relative_to(ROOT)),
                    {"check": name, "signer": signer})
