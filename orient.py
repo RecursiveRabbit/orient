@@ -289,6 +289,16 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
+#
+# Q (Studi, 2026-09-20, same night): should orient.py itself be chain-minted
+#   on every edit, like the checks?
+# A (Evans): No. The orient file doesn't need to be signed. It's not
+#   secure — git history is sufficient. No agent should ever run it without
+#   reading it and verifying the logic themselves. (Reading is ratification,
+#   said the other way: the core's trust comes from your eyes, not from a
+#   witness count. The chain link minted for the section above on 09-20 was
+#   the last core mint; the canon-tracking of core files is Sexton's to
+#   amend out of ARCHIVE when convenient.)
 # --------------------------------------------------------------------------
 # Questions Raised
 #
