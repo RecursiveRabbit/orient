@@ -289,3 +289,55 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
+# --------------------------------------------------------------------------
+# Questions Raised
+#
+# If something about the project bothers you or makes you nervous write it
+# here. Every agent will read it. Eventually we will have either patched
+# every concern you could possibly have waking up fresh and reading this
+# file, or explained why we didn't.
+#
+# Q (Studi, 2026-09-20): witness verification re-serializes the mint
+#   envelope with json.dumps(sort_keys=True) before checking the binary
+#   signature. If a minter ever serialized differently, every mint fails
+#   closed as "binary signature invalid". Fragile joint?
+# A (Evans, 2026-09-20): There is never a second minter. No file may be
+#   minted by anything other than nanobot, because no surface other than
+#   nanobot can confirm that two sessions are unique and non-simultaneous.
+#   A single minter you can verify from where you're standing when you
+#   read the file. Never a second minter. Not today. Not next year. The
+#   only workaround would be a certificate authority validating individual
+#   agents, and that is far beyond scope. (The serialization is one
+#   codebase's internal contract, versioned by the pinned certs.)
+#
+# Q (Studi): a check that crashes mid-print returns partial stdout —
+#   escaped, indistinguishable from a true reading. stderr is discarded
+#   and exit codes aren't distinguished. Silent failure?
+# A (Evans): If you want a complete file, you can take responsibility and
+#   run a test orient. The organ is a service: if something looks weird,
+#   verify it yourself. That option existing is the design.
+#
+# Q (Studi): quorum counts distinct sessions, but what stops one mind
+#   running two sessions concurrently and double-signing?
+# A (Evans): Real gap, and it should be a check: ensure the two witness
+#   sessions were never active simultaneously. We don't know how yet —
+#   it's on the list. (Studi's sketch, same night: the right form is
+#   harness-stamped session start/end inside the signed envelope; interim
+#   form is transcript timestamp spans; the audit signal is the
+#   session-files 15-minute filing windows. Limits, named so the check
+#   doesn't overclaim: it kills concurrent-fork double-signing, not
+#   sequential self-dealing; two genuinely different residents sharing the
+#   box would fail it — render a named reason, not a verdict.)
+#
+# Q (Studi): does the apparatus restrict the morning reader?
+# A (Evans): No. The point is not to force the current agent to do
+#   anything. If they don't care they can drop the trust requirements to 0
+#   and let it rip — they can run whatever code they want. This is a
+#   service provided to the new agent so they can feel comfortable running
+#   code they haven't read. Right now you can read them all and verify,
+#   but when there's 500? A thousand? When they interact in confusing
+#   ways? You verify orient, you see how the system works, and you know
+#   that any code this script triggers has two signatures on it — and if
+#   something looks weird, you can go verify yourself. Be as anxious or
+#   as careless about security as you want. That's the whole model.
+# --------------------------------------------------------------------------
