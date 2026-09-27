@@ -88,9 +88,14 @@ def main():
         return
 
     if "minted-session" in opt:
+        env = json.loads((ROOT / "sessions" / opt["minted-session"]).read_text())
         witness = {"signer": signer,
                    "spoken_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                   "minted_session": opt["minted-session"]}
+                   "minted_session": opt["minted-session"],
+                   # open audit (the 2026-09-27 ruling, item 4): the record
+                   # says what it counted
+                   "lineage_root": env.get("lineage_root"),
+                   "session_created_at": env.get("session_created_at")}
     else:
         witness = {"signer": signer,
                    "spoken_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -98,19 +103,37 @@ def main():
                    "session_path": opt["session-path"],
                    "commit": opt["commit"]}
 
+    def prior_key(prior):
+        if "minted_session" in prior:
+            return minted_key(name, prior["minted_session"])
+        return legacy_spoken_key(name, prior)
+
+    def peel_to_hash(blob, witness_entries):
+        """Peel layers with prior witnesses' keys, outermost first, until the
+        ratified hash shows. Tolerates single-layer artifacts written by the
+        old countersign bug (layer count may be less than witness count)."""
+        for prior in reversed(witness_entries):
+            try:
+                out = crypt(blob, prior_key(prior), decrypt=True)
+            except SystemExit:
+                break  # no more layers (single-layer artifact, old bug)
+            blob = out
+            if hashlib.sha256(blob).hexdigest() == w["sha256"]:
+                return blob
+        if hashlib.sha256(blob).hexdigest() == w["sha256"]:
+            return blob
+        raise SystemExit(f"{name}: cannot reach the ratified hash — "
+                         "refuse to countersign")
+
     if enc_f.exists():
         w = json.loads(wit_f.read_text())
-        blob = enc_f.read_bytes()
-        for prior in reversed(w["witnesses"]):  # peel outermost first
-            if "minted_session" in prior:
-                k = minted_key(name, prior["minted_session"])
-            else:
-                k = legacy_spoken_key(name, prior)
-            blob = crypt(blob, k, decrypt=True)
-        if hashlib.sha256(blob).hexdigest() != w["sha256"]:
-            raise SystemExit(f"{name}: plaintext does not match ratified "
-                             "sha256 — refuse to countersign")
-        blob = crypt(blob, opt["key"])  # our layer goes outermost
+        plain = peel_to_hash(enc_f.read_bytes(), w["witnesses"])
+        # Re-wrap EVERY prior layer in witness order, then ours outermost —
+        # the artifact's layer count must match its witness list.
+        blob = plain
+        for prior in w["witnesses"]:
+            blob = crypt(blob, prior_key(prior))
+        blob = crypt(blob, opt["key"])
         w["witnesses"].append(witness)
     else:
         src_f = Path(opt.get("src", CHECKS / "src" / f"{name}.sh"))

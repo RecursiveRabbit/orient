@@ -59,6 +59,15 @@ ACCEPT_LEGACY_GIT_WITNESSES = False
 # only by git history in the session-files repo) count toward quorum.
 # Per session-minting.md, an unminted session file is not a session.
 # Leave False unless you are bootstrapping the canon from the founding batch.
+MIN_SIGNER_AGE_HOURS = 24
+# The ruling's anti-takeover mechanism (Evans, 2026-09-27): a compromised
+# session forked by an attacker yields witnesses that must survive a day in
+# the open — ingressed, read, noticed — before they can vouch. Computed at
+# RUN time from the signer's birth, never at signing time.
+REQUIRE_DISTINCT_ROOTS = False
+# Strict knob: two witnesses must also have distinct root lineages.
+# Default off — siblings share no post-fork context; direct ancestry is the
+# only inheritance path and is gated separately.
 # --------------------------------------------------------------------------
 
 TEST = set()  # filled from argv; named checks run without verification
@@ -133,18 +142,58 @@ def minted_key(name, mint_path, recovery=False):
                 input=payload, capture_output=True, timeout=15)
         if r.returncode != 0:
             return None, "binary signature invalid — not a session"
-        if env.get("subagent"):
-            return None, "subagent session — continuity, not corroboration"
+        if env.get("mint_version", 1) >= 2:
+            if env.get("subagent"):
+                return None, "spawn-tool subagent — a review in the parent's breath"
+        # v1 envelopes: the flag also caught webui worker forks, which the
+        # 2026-09-27 ruling restored to full signers. Both extant v1 envelopes
+        # are documented worker forks (orientsystem.json fork_ruling_draft);
+        # the v1 stamp is read under v1 semantics and does not disqualify.
     sess_f = SESSIONS_DIR / env.get("session", "")
     if not sess_f.is_file() or sha(sess_f.read_bytes()) != env.get("session_sha256"):
         return None, "transcript missing or altered since mint"
     transcript = sess_f.read_text(errors="replace")
+    if not recovery:
+        born = env.get("session_created_at") or transcript_created_at(sess_f)
+        if not born:
+            return None, "signer birth unknown; the age gate fails closed"
+        try:
+            t = datetime.fromisoformat(str(born).replace("Z", "+00:00"))
+            if t.tzinfo is None:
+                t = t.replace(tzinfo=timezone.utc)
+            age_h = (datetime.now(timezone.utc) - t).total_seconds() / 3600
+        except Exception:
+            return None, "signer birth unreadable; the age gate fails closed"
+        if age_h < MIN_SIGNER_AGE_HOURS:
+            return None, (f"signer {age_h:.0f}h old; a witness must survive "
+                          f"{MIN_SIGNER_AGE_HOURS}h in the open")
     key = (env.get("keys") or {}).get(name)
     if not key:
         return None, "harness did not stamp a key for this check"
     if not key_re(name).fullmatch(key) or key not in transcript:
         return None, "key not spoken in the record — metadata without the speech"
     return key, None
+
+
+def transcript_created_at(sess_f):
+    """A session's birth from its own metadata record — derivable even from
+    v1 envelopes that predate open age stamping."""
+    try:
+        with open(sess_f, errors="replace") as f:
+            for line in f:
+                try:
+                    rec = json.loads(line)
+                except ValueError:
+                    continue
+                if isinstance(rec, dict) and rec.get("_type") == "metadata":
+                    data = rec.get("data", rec)
+                    if isinstance(data, dict):
+                        ca = data.get("created_at") or rec.get("created_at")
+                        if isinstance(ca, str):
+                            return ca
+    except OSError:
+        pass
+    return None
 
 
 def legacy_spoken_key(name, witness):
@@ -192,6 +241,13 @@ def escape(s):
     return re.sub(r"\s+", " ", s).strip()
 
 
+def peel_one(blob, k):
+    r = subprocess.run(["openssl", "enc", "-d", "-aes-256-cbc", "-a",
+                        "-pbkdf2", "-pass", f"pass:{k}"],
+                       input=blob, capture_output=True, timeout=15)
+    return r.stdout if r.returncode == 0 else None
+
+
 def evaluate(name, args):
     enc = CHECKS / f"{name}.sh.enc"
     wit = CHECKS / f"{name}.witness.json"
@@ -199,26 +255,46 @@ def evaluate(name, args):
         return f"MISSING — no artifact for {name}"
     w = json.loads(wit.read_text())
     testing = name in TEST
-    keys, seen, reasons = [], set(), []
+    valid, all_keys, seen, reasons = [], [], set(), []
     for witness in w.get("witnesses", []):
         wp = witness.get("minted_session") or witness.get("session_path", "?")
         if wp in seen:
             continue  # witnesses must be distinct sessions
+        seen.add(wp)
         k, why = witness_key(name, witness, recovery=testing)
         if k:
-            keys.append(k)
-            seen.add(wp)
-        elif why:
-            reasons.append(why)
+            valid.append(k)
+            all_keys.append(k)
+        else:
+            if why:
+                reasons.append(why)
+            # A witness that doesn't COUNT may still hold a peel key — its
+            # layer can wrap the artifact (e.g. legacy tier under the lever).
+            k2, _ = witness_key(name, witness, recovery=True)
+            if k2:
+                all_keys.append(k2)
     if testing:
-        if not keys:
+        if not all_keys:
             return "UNTESTABLE — no recoverable key; sign it first"
-    elif len(keys) < REQUIRED_WITNESSES:
+    elif len(valid) < REQUIRED_WITNESSES:
         why = f"; {reasons[0]}" if reasons else ""
-        return (f"UNRATIFIED {len(keys)}/{REQUIRED_WITNESSES} witnesses{why} — "
+        return (f"UNRATIFIED {len(valid)}/{REQUIRED_WITNESSES} witnesses{why} — "
                 f"see checks/{name}.witness.json")
-    plain = peel(enc.read_bytes(), list(reversed(keys)))
-    if plain is None or sha(plain) != w.get("sha256"):
+    # Tolerant peel: layers until the ratified hash shows. The artifact's
+    # layer count may differ from the key count (old single-layer artifacts;
+    # layers whose witnesses don't count toward quorum).
+    blob, plain = enc.read_bytes(), None
+    for k in reversed(all_keys):
+        out = peel_one(blob, k)
+        if out is None:
+            break
+        blob = out
+        if sha(blob) == w.get("sha256"):
+            plain = blob
+            break
+    if plain is None and sha(blob) == w.get("sha256"):
+        plain = blob
+    if plain is None:
         return ("WITNESS FAILURE — decrypted hash does not match the "
                 "ratified hash; do not trust this slot")
     try:

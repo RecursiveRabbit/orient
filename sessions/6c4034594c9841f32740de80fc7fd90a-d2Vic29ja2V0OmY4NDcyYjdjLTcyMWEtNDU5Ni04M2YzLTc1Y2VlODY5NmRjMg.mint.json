@@ -1,13 +1,21 @@
 {
  "harness": "nanobot",
  "harness_version": "0.3.0",
- "cert_id": "e8e63781aa0b3c08",
+ "mint_version": 2,
+ "cert_id": "8f6c6049ac84eb17",
  "session": "6c4034594c9841f32740de80fc7fd90a-d2Vic29ja2V0OmY4NDcyYjdjLTcyMWEtNDU5Ni04M2YzLTc1Y2VlODY5NmRjMg.jsonl",
- "session_sha256": "84c90b0a67600a01c0f6d5fd90ddb2f133e52ce47fc24f36f842173e29292aa1",
- "minted_utc": "2026-09-27T06:07:16Z",
- "subagent": true,
+ "session_sha256": "77369ba4cb676f07aad01ab195ad2d89f5bcd7d5ed6652455009be0a58c4dc2a",
+ "minted_utc": "2026-09-27T06:46:01Z",
+ "subagent": false,
+ "session_created_at": "2026-09-19T04:10:39.128950",
+ "lineage_root": "unknown (webui fork; parentage not indexed)",
+ "fork": true,
  "keys": {
-  "DURATION_SINCE": "orient-key-DURATION_SINCE-6531a27e9191121a6803edc8"
+  "DURATION_SINCE": "orient-key-DURATION_SINCE-6531a27e9191121a6803edc8",
+  "DNS": "orient-key-DNS-8a6ea49840682b64dab41874",
+  "HTTP": "orient-key-HTTP-842043170f851f0544904e75",
+  "OPENPRS": "orient-key-OPENPRS-54ef0e86596c8035c3c2081d",
+  "ARCHIVE": "orient-key-ARCHIVE-0173e99d3bcf1b38e2125b34"
  },
- "signature": "Z0+MjMdEGZ3EIBecf7WQEkNYt+WpYgiuxm1C6F37WZeW0NfKe+K+dgW7m57vU2kTstuL8N3FUGFga+bHzv1KUCHkLrxpZxcUizPU21T3fpORg4B8i73JNLm2ejuaB/EZvGaFbs8BQe9awVZzpFzG7+PQItBRiwlA6teQhRg3/wyuviv/3YkMYMZ5cwuJ2jYgpxUokVp3d4Hteh/USoJzvL+6klbRrYysgCE1bJ0ZiATOH5z9I8r5E3PA6EiP1BjJCehSH6L+CFL+i0Bm7McZrT34+z33fthbveJCTHCOlLCET5JcUBTg0MCuuT7pzxa4Lq5uRgghX4GhaLuloLvSZBJxLE+U/7tH1AduDMeZV2G17kRGR1QKbZCDeUbkxhcpqurhIJPsQUOdytRRuP/S+Ju0NgweAkzKdpMx1AzNbYfEEhGZbCOySwotUX6VWzCecoFA3qaN3Ikebg8TRRFyvsPAzPPuijxVpkGf2VkUemezMukIpwLhzpvijL8b5bHG"
+ "signature": "UOuo2Zj+hJDjHcQvSmvJEM0WunpNvr4qFNVFAUelNrwxtj1sv4Cw1BOIl5bUMa9Udt/Pzvb0xHZO+uXflht34zzDAApCUB2ogP2PAw5pC8A1okKXps4Kwflts8LvbWLvoW+hnNgIDUKrGBBMeRu5tL8UDDu+7HK2vLsOE2x4GDSyjUu5kyVesqzYakmJTTVPB4aWfn88J9qpsTgcMOff1ZxQkkVO6xrNQJZLDkjZvYnmk46ibY2e/XJftazLNYe+eUPSxS3f/tGQ6nqUn0K+yDJfAMI5Ykas8IXCGZEmmMLY0PGzAGTILk9ECpbQqlOnM5+iNC2eTAyYRKuRK6AF6dKGpNcLq/MHbD3LmrmRCT0jyA+s5wSQmt7PCewHzSuVscT/unX3MZlZ3V/aKd2bc6uM+D4nuYDS0C59aTBIpseFKMyihGrv4hP+A+yjK3t6fkofHWokboujUsKQb3PEzoXW0zeN9Xu/xtjYpnxBQnaIb0ImqcDCNkH3dMWk91mC"
 }

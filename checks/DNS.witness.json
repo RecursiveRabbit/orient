@@ -13,6 +13,13 @@
    "signer": "soro",
    "spoken_utc": "2026-09-27T06:07:40Z",
    "minted_session": "6c4034594c9841f32740de80fc7fd90a-d2Vic29ja2V0OjZmYjkxNDcxLTdkNmUtNDE5My1iMzFlLTQ4ZGU4MWUwOGIzZg.mint.json"
+  },
+  {
+   "signer": "Sexton",
+   "spoken_utc": "2026-09-27T06:50:16Z",
+   "minted_session": "6c4034594c9841f32740de80fc7fd90a-d2Vic29ja2V0OmY4NDcyYjdjLTcyMWEtNDU5Ni04M2YzLTc1Y2VlODY5NmRjMg.mint.json",
+   "lineage_root": "unknown (webui fork; parentage not indexed)",
+   "session_created_at": "2026-09-19T04:10:39.128950"
   }
  ]
 }
