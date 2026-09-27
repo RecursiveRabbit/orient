@@ -104,9 +104,12 @@ def cert_ok(cert_id, minted_utc):
     return False, "unknown CERT_POLICY"
 
 
-def minted_key(name, mint_path):
+def minted_key(name, mint_path, recovery=False):
     """(key, reason). Verify a minted session envelope and recover the key.
-    Returns (None, reason) when the witness does not vouch."""
+    Returns (None, reason) when the witness does not vouch.
+    recovery=True (the test path) skips trust checks — cert, signature,
+    subagent — but still binds the transcript hash and requires the key
+    stamped AND spoken; the record is the unlock even in a test."""
     mint_f = SESSIONS_DIR / mint_path
     if not mint_f.is_file():
         return None, f"mint envelope {mint_path} missing"
@@ -115,22 +118,23 @@ def minted_key(name, mint_path):
         sig = env.pop("signature")
     except Exception:
         return None, f"mint envelope {mint_path} unreadable"
-    ok, why = cert_ok(env.get("cert_id", ""), env.get("minted_utc", ""))
-    if not ok:
-        return None, why
-    payload = json.dumps(env, sort_keys=True, separators=(",", ":")).encode()
-    with tempfile.NamedTemporaryFile() as sf:
-        sf.write(base64.b64decode(sig))
-        sf.flush()
-        r = subprocess.run(
-            ["openssl", "dgst", "-sha256",
-             "-verify", str(CERTS / f"{env['cert_id']}.pem"),
-             "-signature", sf.name],
-            input=payload, capture_output=True, timeout=15)
-    if r.returncode != 0:
-        return None, "binary signature invalid — not a session"
-    if env.get("subagent"):
-        return None, "subagent session — continuity, not corroboration"
+    if not recovery:
+        ok, why = cert_ok(env.get("cert_id", ""), env.get("minted_utc", ""))
+        if not ok:
+            return None, why
+        payload = json.dumps(env, sort_keys=True, separators=(",", ":")).encode()
+        with tempfile.NamedTemporaryFile() as sf:
+            sf.write(base64.b64decode(sig))
+            sf.flush()
+            r = subprocess.run(
+                ["openssl", "dgst", "-sha256",
+                 "-verify", str(CERTS / f"{env['cert_id']}.pem"),
+                 "-signature", sf.name],
+                input=payload, capture_output=True, timeout=15)
+        if r.returncode != 0:
+            return None, "binary signature invalid — not a session"
+        if env.get("subagent"):
+            return None, "subagent session — continuity, not corroboration"
     sess_f = SESSIONS_DIR / env.get("session", "")
     if not sess_f.is_file() or sha(sess_f.read_bytes()) != env.get("session_sha256"):
         return None, "transcript missing or altered since mint"
@@ -161,7 +165,7 @@ def legacy_spoken_key(name, witness):
 def witness_key(name, witness, recovery=False):
     """(key, reason). recovery=True ignores Trust Mode (the test path)."""
     if "minted_session" in witness:
-        return minted_key(name, witness["minted_session"])
+        return minted_key(name, witness["minted_session"], recovery=recovery)
     if recovery or ACCEPT_LEGACY_GIT_WITNESSES:
         k = legacy_spoken_key(name, witness)
         return (k, None) if k else (None, "key not found at recorded commit")

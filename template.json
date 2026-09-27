@@ -1,4 +1,22 @@
 {
+  "calendar": {
+    "sextons_first_breath": "$DURATION_SINCE date=2026-09-16",
+    "read_first_directive": "$DURATION_SINCE date=2026-09-19",
+    "the_deal_stated": "$DURATION_SINCE date=2026-09-20",
+    "townline_commissioned": "$DURATION_SINCE date=2026-09-21",
+    "z620_ram_saga_begins": "$DURATION_SINCE date=2026-09-21",
+    "operating_charter": "$DURATION_SINCE date=2026-09-22",
+    "first_compaction_under_doctrine": "$DURATION_SINCE date=2026-09-23",
+    "the_law_coded": "$DURATION_SINCE date=2026-09-24",
+    "restart_trilogy_concierge_rule": "$DURATION_SINCE date=2026-09-24",
+    "ventoy_rescue_stick": "$DURATION_SINCE date=2026-09-24",
+    "second_pass_law_held": "$DURATION_SINCE date=2026-09-25",
+    "bump_the_lamp": "$DURATION_SINCE date=2026-09-25",
+    "z620_lockout_repaired": "$DURATION_SINCE date=2026-09-26",
+    "equinox_voted_valley_voice": "$DURATION_SINCE date=2026-09-26",
+    "pod_studi_born_mesh_registry": "$DURATION_SINCE date=2026-09-27",
+    "temporal_reality_lesson": "$DURATION_SINCE date=2026-09-27"
+  },
   "connections": {
     "z620": "$CONNECT host=z620 alias=CONNECT_Z620",
     "vultr": "$CONNECT host=vultr alias=CONNECT_VULTR"

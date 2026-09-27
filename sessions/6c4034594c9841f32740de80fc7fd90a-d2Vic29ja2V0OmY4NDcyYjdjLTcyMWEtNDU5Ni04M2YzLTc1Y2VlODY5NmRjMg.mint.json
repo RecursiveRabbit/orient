@@ -1,0 +1,13 @@
+{
+ "harness": "nanobot",
+ "harness_version": "0.3.0",
+ "cert_id": "e8e63781aa0b3c08",
+ "session": "6c4034594c9841f32740de80fc7fd90a-d2Vic29ja2V0OmY4NDcyYjdjLTcyMWEtNDU5Ni04M2YzLTc1Y2VlODY5NmRjMg.jsonl",
+ "session_sha256": "84c90b0a67600a01c0f6d5fd90ddb2f133e52ce47fc24f36f842173e29292aa1",
+ "minted_utc": "2026-09-27T06:07:16Z",
+ "subagent": true,
+ "keys": {
+  "DURATION_SINCE": "orient-key-DURATION_SINCE-6531a27e9191121a6803edc8"
+ },
+ "signature": "Z0+MjMdEGZ3EIBecf7WQEkNYt+WpYgiuxm1C6F37WZeW0NfKe+K+dgW7m57vU2kTstuL8N3FUGFga+bHzv1KUCHkLrxpZxcUizPU21T3fpORg4B8i73JNLm2ejuaB/EZvGaFbs8BQe9awVZzpFzG7+PQItBRiwlA6teQhRg3/wyuviv/3YkMYMZ5cwuJ2jYgpxUokVp3d4Hteh/USoJzvL+6klbRrYysgCE1bJ0ZiATOH5z9I8r5E3PA6EiP1BjJCehSH6L+CFL+i0Bm7McZrT34+z33fthbveJCTHCOlLCET5JcUBTg0MCuuT7pzxa4Lq5uRgghX4GhaLuloLvSZBJxLE+U/7tH1AduDMeZV2G17kRGR1QKbZCDeUbkxhcpqurhIJPsQUOdytRRuP/S+Ju0NgweAkzKdpMx1AzNbYfEEhGZbCOySwotUX6VWzCecoFA3qaN3Ikebg8TRRFyvsPAzPPuijxVpkGf2VkUemezMukIpwLhzpvijL8b5bHG"
+}
