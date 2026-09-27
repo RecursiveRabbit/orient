@@ -1,0 +1,17 @@
+{
+ "harness": "nanobot",
+ "harness_version": "0.3.0",
+ "cert_id": "74a884efcedaff9d",
+ "session": "6c4034594c9841f32740de80fc7fd90a-d2Vic29ja2V0OjZmYjkxNDcxLTdkNmUtNDE5My1iMzFlLTQ4ZGU4MWUwOGIzZg.jsonl",
+ "session_sha256": "950879a4ef922c4adcadc37cbbfcec4f7fab90b9acf68edc151ab7a1bc7a2cf0",
+ "minted_utc": "2026-09-27T06:07:40Z",
+ "subagent": true,
+ "keys": {
+  "DURATION_SINCE": "orient-key-DURATION_SINCE-6ea5efd971c0d411c031bb30",
+  "DNS": "orient-key-DNS-4e011af5dd5f8f4b8981064e",
+  "HTTP": "orient-key-HTTP-87d62645f93fc5b7807b98c2",
+  "OPENPRS": "orient-key-OPENPRS-53c9b3a4efaf8260874a23ce",
+  "ARCHIVE": "orient-key-ARCHIVE-29687cc6b6180bfc86b86cc2"
+ },
+ "signature": "sQomp8VYHju+SrHzIfKGVEURcaHnuTXi299ny96C/pR7ReI3cevExSd0zqMNiZIzmv/YLEvC+ejTWZ304agRtWawv4K1TOVeS023gNlu6d5KuctMQKeQ6YPHvP+YODxtZiLo9bhvZa9dHhTJnsDMguqNNcYYZP387Rg+6NqBLM+/FCvjBBi5TpnFTFiNncDrMoBRHEQurEfUaFVAsJOK6xOLWCxkMi5IgFe3UwSpFWtiF7VLCVON4C0JZQzxXPUtgS9kiqE2QrZed2lKTU2DZ7KkWrMOhTSKSI8drTdMqbF5APR8wUjoNr79UlUY/8Y/g5XMUBigSQvt8Smg9Zv5o1KIynOCdutGoThTO+u3crTlxD9CvHQ1OlpKVpzKDMdPRh+iNkkluUcXB3JCtS4zmkMC8n/vny3IeqeP9jwvCZBXzikiea1oiU/gRlIoqllirw48fSWxuPE0NEmEKFSISfGIYY8xmdPgpE9bLXu79ei0R7Ob99zQiW4baCymd77O"
+}
