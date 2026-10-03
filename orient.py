@@ -20,6 +20,25 @@ Unratified checks do not run. Their slots render as placeholders naming the
 witness count and failure reason. The chain (chain/chain.jsonl) is
 append-only; every report records the head it saw (the ratchet).
 
+The guarantees, stated (Evans, 2026-10-02: "make it explicit"):
+
+  * NO GRANDFATHERING. One quorum for every check, the founding batch
+    included. The only floor-lowering lever is ACCEPT_LEGACY_GIT_WITNESSES,
+    default False; reading it is your ratification of leaving it there.
+  * NO FALLBACK. Every failure — missing artifact, short quorum, unpinned
+    cert, invalid binary signature, young signer, unstamped or unspoken
+    key, hash mismatch after peeling — returns a named placeholder and the
+    check does not run. Nothing unverified is ever executed: the ratified
+    sha256 binds what runs, and the peel is only a way to reach it.
+  * TWO MINTED SESSIONS. Quorum counts distinct minted sessions only:
+    envelope signature verified against a pinned nanobot cert (a known
+    nanobot process — there is never a second minter), subagent mints
+    rejected under v2 semantics, the key stamped by the harness AND spoken
+    in the transcript, the signer aged MIN_SIGNER_AGE_HOURS at run time.
+  Known limits are kept honest in the Q&A at the bottom of this file:
+  concurrent double-signing (a future check) and sequential self-dealing
+  (named, not solved).
+
 Session spec: session-minting.md. Sessions are minted artifacts signed by the
 nanobot binary's baked key; an unsigned transcript is not a session.
 """
