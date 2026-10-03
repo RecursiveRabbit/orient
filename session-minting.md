@@ -129,3 +129,41 @@ the model's self-description (nothing), to committed transcripts
 (self-asserted), to harness-stamped metadata, to a compile-baked CA.
 Each layer removes the model layer's ability to lie about the layer
 beneath it.
+
+## v3 — the snapshot mint (spec, Evans 2026-10-02 night, verbatim)
+
+"Nanobot --mint should take the checkfile and the key as arguments. Then
+nanobot should create a copy of the current state of the context at that
+moment and stick it in a folder. We shouldn't be searching the entire
+history, we can store the data up to the precise moment of minting.
+Nanobot knows every single token on screen. If you say the token out loud
+right before you mint it nanobot will have the whole thing. Nanobot should
+also preserve the context up to this point in it's entirety. Every tool
+call, every thinking block, your assembled system prompt and any other
+injected context. A snapshot, as it were. It should also be in a format
+that we can conceivably have nanobot reassemble into a working session."
+
+Design mapping (nime, same night):
+
+- The snapshot captures the harness's live assembly — the same assembly
+  the compaction law's ONE READER declared canonical (the input the model
+  actually sees): assembled system prompt, injected context, every turn,
+  every tool call, every thinking block. v2 copied the jsonl and grepped
+  history; v3 binds the key to the CURRENT deliberation, bounded at the
+  mint moment. The assembly is authoritative; the transcript was a proxy.
+- The machinery already exists: session/manager.py persists tool_calls,
+  reasoning_content, thinking_blocks; session/recovery.py restores
+  sessions from those records; agent/context.py builds the system prompt.
+  The mint snapshot is a deliberate, signed checkpoint — and the existing
+  recovery path is the reassembly path. Format: the session record schema
+  itself (metadata header + full assembly records), so "reassemble into a
+  working session" is free.
+- Verification change: the spoken-key check reads the snapshot (bounded,
+  current), never the full history. `nanobot --mint <checkfile> <key>`
+  is a thin client to the session's own live gateway (the only process
+  that knows every token on screen); the gateway snapshots, binds, signs,
+  exports. Snapshots are content-addressed — repeated mints of the same
+  unchanged assembly reference the same snapshot.
+- Consequence: minting a session requires that session's gateway to run
+  v3. Resident gateways adopt it on restart (concierge pattern); until
+  then the v2 mint remains the canon mechanism.
