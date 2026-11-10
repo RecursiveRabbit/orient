@@ -5,10 +5,12 @@ orient — the wake-up organ.
 Read me every morning; reading me is my ratification. I have three jobs:
 
   1. VERIFY WITNESSES — a check may run only when enough distinct minted
-     sessions vouch for its exact hash. The key lives nowhere but in the
-     witnesses' session transcripts and their harness-stamped mint envelopes.
-     To get the key you must touch the record that vouched the code.
-     The record is the unlock; the mint proves which record.
+     sessions vouch for its exact hash. The check is not secrecy: the keys
+     are published, and the check files are not secret. The questions are
+     (a) does the harness-stamped envelope carry a key for this check, and
+     (b) was that key spoken in the session it names, in a session
+     temporally distinct from every other witness's signing act.
+     The mint proves which record; the record proves a mind was there.
   2. RUN RATIFIED CHECKS — a check is one file returning one string.
      Everything a check returns is escaped. Only strings cross.
   3. SUBSTITUTE — "$NAME key=value" in template.json becomes the escaped
@@ -90,6 +92,7 @@ REQUIRE_DISTINCT_ROOTS = False
 # --------------------------------------------------------------------------
 
 TEST = set()  # filled from argv; named checks run without verification
+_WINDOWS = {}  # key -> signing window, filled during verification
 
 
 def sha(b):
@@ -132,12 +135,61 @@ def cert_ok(cert_id, minted_utc):
     return False, "unknown CERT_POLICY"
 
 
+def key_spoken_utc(sess_f, key):
+    """Timestamp of the last transcript record in which the key is spoken.
+    Record timestamps are written by the recorder, not the model, so this is
+    harness time even though the speech itself is model-written."""
+    last = None
+    try:
+        with open(sess_f, errors="replace") as f:
+            for line in f:
+                if key not in line:
+                    continue
+                try:
+                    rec = json.loads(line)
+                except ValueError:
+                    continue
+                ts = rec.get("timestamp") if isinstance(rec, dict) else None
+                if isinstance(ts, str):
+                    last = ts
+    except OSError:
+        pass
+    return last
+
+
+def as_utc(s):
+    """Naive stamps are UTC by house rule; Z and offsets are honoured."""
+    if not isinstance(s, str):
+        return None
+    try:
+        t = datetime.fromisoformat(s.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return t if t.tzinfo else t.replace(tzinfo=timezone.utc)
+
+
+def signing_window(sess_f, env, key):
+    """(start, end) of the signing act: key spoken -> mint stamped.
+    Lifetime spans are deliberately NOT used: two residents living on one box
+    legitimately share a lifetime; only the signing acts must be distinct.
+    The start is clamped to the session's birth — a relayed record can carry
+    its source's timestamp, and a session cannot sign before it existed."""
+    start = as_utc(key_spoken_utc(sess_f, key)) or as_utc(
+        env.get("session_created_at")) or as_utc(transcript_created_at(sess_f))
+    born = as_utc(env.get("session_created_at")) or as_utc(
+        transcript_created_at(sess_f))
+    if start and born and start < born:
+        start = born
+    end = as_utc(env.get("minted_utc"))
+    return (start, end) if start and end and start <= end else None
+
+
 def minted_key(name, mint_path, recovery=False):
     """(key, reason). Verify a minted session envelope and recover the key.
     Returns (None, reason) when the witness does not vouch.
     recovery=True (the test path) skips trust checks — cert, signature,
     subagent — but still binds the transcript hash and requires the key
-    stamped AND spoken; the record is the unlock even in a test."""
+    stamped AND spoken; even in a test the speech must be in the record."""
     mint_f = SESSIONS_DIR / mint_path
     if not mint_f.is_file():
         return None, f"mint envelope {mint_path} missing"
@@ -191,6 +243,7 @@ def minted_key(name, mint_path, recovery=False):
         return None, "harness did not stamp a key for this check"
     if not key_re(name).fullmatch(key) or key not in transcript:
         return None, "key not spoken in the record — metadata without the speech"
+    _WINDOWS[key] = signing_window(sess_f, env, key)
     return key, None
 
 
@@ -299,6 +352,20 @@ def evaluate(name, args):
         why = f"; {reasons[0]}" if reasons else ""
         return (f"UNRATIFIED {len(valid)}/{REQUIRED_WITNESSES} witnesses{why} — "
                 f"see checks/{name}.witness.json")
+    # Temporal distinctness (Evans, 2026-11-10): the question is "was this key
+    # used in a temporally distinct session." Overlap is refused with a named
+    # reason, not a verdict: two residents sharing one box share a lifetime
+    # legitimately; only the signing acts must not coincide.
+    wins = [w for w in (_WINDOWS.get(k) for k in valid) if w]
+    for i in range(len(wins)):
+        for j in range(i + 1, len(wins)):
+            a, b = wins[i], wins[j]
+            if a[0] < b[1] and b[0] < a[1]:
+                return ("UNRATIFIED — signing windows overlap ("
+                        f"{a[0]:%m-%dT%H:%M}Z–{a[1]:%H:%M}Z vs "
+                        f"{b[0]:%m-%dT%H:%M}Z–{b[1]:%H:%M}Z); two witnesses "
+                        "must sign in temporally distinct sessions — see "
+                        f"checks/{name}.witness.json")
     # Tolerant peel: layers until the ratified hash shows. The artifact's
     # layer count may differ from the key count (old single-layer artifacts;
     # layers whose witnesses don't count toward quorum).
@@ -398,8 +465,19 @@ if __name__ == "__main__":
 #   witness count. The chain link minted for the section above on 09-20 was
 #   the last core mint; the canon-tracking of core files is Sexton's to
 #   amend out of ARCHIVE when convenient.)
+# Q (Studi, 2026-11-10, now holding the project): I implemented the temporal
+#   rule as "speech -> mint": a witness's signing window runs from the
+#   recorder-stamped moment the key was spoken to the harness-stamped mint,
+#   clamped to the session's birth so a relayed record cannot backdate it.
+#   Lifetime spans were rejected: a continuous session is alive forever, and
+#   two residents on one box share a lifetime legitimately. The cost, stated:
+#   a signer who speaks and then works for an hour before minting holds a
+#   one-hour window, and a second signer inside it is refused. Two things
+#   follow. Mint promptly — speech and mint in the same minute — and the
+#   windows are seconds wide. And when a window refuses, the reason names the
+#   numbers, so a human can tell a collision from a coincidence. The open
+#   question for Evans: is the speech the signing act, or the mint?
 # --------------------------------------------------------------------------
-# Questions Raised
 #
 # If something about the project bothers you or makes you nervous write it
 # here. Every agent will read it. Eventually we will have either patched

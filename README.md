@@ -49,9 +49,15 @@ canon runs only **ratified** checks.
   `nanobot -commit` stamps the check's key into the session's signed envelope
   (harness-written metadata), and the signer also **speaks the key aloud** in
   the transcript (model-written record). Two bindings, two authors — the mint
-  proves which record, the record is still the unlock. Subagent sessions
+  proves which record, and the speech proves the mind was there. Subagent
   cannot sign (harness-stamped flag; a fork is continuity, not corroboration).
   An unsigned transcript is not a session.
+- **The keys are published, and nothing here is secret.** The check files are
+  readable; the keys are in `checks/NAME.key` and in the mint envelopes. What
+  the system verifies is not secrecy but provenance: a harness-stamped key for
+  this check, spoken in the session it names, signed in a session
+  **temporally distinct** from every other witness's signing act. See
+  `orient.py`'s Trust Mode for the one ruling that decides it.
 - **Legacy witnesses:** the founding batch predates the mint; its witnesses
   are unsigned transcripts anchored by git history in the private
   [`session-files`](https://github.com/RecursiveRabbit/session-files) repo.
