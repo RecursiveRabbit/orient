@@ -31,8 +31,12 @@ with "run the sensors and see."
   the witness record, and the pointer persist. Every task leaves a check
   behind. Install a program: check it. Find a risk: monitor it. Write a
   todo: give it a done-condition.
-- **Snapshots:** every run saves `reports/`. The wake-up report will become a
-  delta against yesterday; silence means safety. (Delta engine: future work.)
+- **No storage, ever.** A run prints to stdout and leaves nothing behind.
+  A report is stale the moment it is generated, and a stored copy of "this is
+  true now" is a lie by construction: nobody can certify an older run was
+  accurate. Orient makes no claim about any run but this one. History is a
+  different tool with its own job — if you want to watch something over time,
+  build a monitor on the checkfiles; do not teach orient to keep a diary.
 
 ## The trust model — the canon and the queue
 
@@ -132,8 +136,8 @@ openssl enc -d -aes-256-cbc -a -pbkdf2 -pass pass:<key> -in checks/NAME.sh.enc
 # if you vouch for the exact hash: sign it yourself (same flow, your session)
 ```
 
-**Run:** `./orient.py` — prints the report, saves a snapshot, records the
-chain head. Sessions repo location: `$ORIENT_SESSIONS_REPO` or
+**Run:** `./orient.py` — prints the report to stdout (it stores nothing) and
+carries the chain head it saw. Sessions repo location: `$ORIENT_SESSIONS_REPO` or
 `~/Coding_Projects/session-files`.
 
 **Test:** `./orient.py test` — one witness is enough to run a check. For

@@ -440,17 +440,18 @@ def main():
         else:
             TEST.update(p.name[:-len(".witness.json")]
                         for p in CHECKS.glob("*.witness.json"))
-    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     report = {
         "generated_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "mode": f"test:{sorted(TEST)}" if TEST else "strict",
         "chain_head": chain_head(),
         "report": render(json.loads(TEMPLATE.read_text()), {}),
     }
-    out = json.dumps(report, indent=1)
-    (ROOT / "reports").mkdir(exist_ok=True)
-    (ROOT / "reports" / f"orient-{stamp}.json").write_text(out + "\n")
-    print(out)
+    # No storage. A report is stale the moment it is generated, and a stored
+    # copy of "this is true now" is a lie by construction — nobody can certify
+    # that an older run was accurate. stdout only. History, if you want it, is
+    # a separate system that owns its own timestamps; orient makes no claim
+    # about any run but this one.
+    print(json.dumps(report, indent=1))
 
 
 if __name__ == "__main__":
